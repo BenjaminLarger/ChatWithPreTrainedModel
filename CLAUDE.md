@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Multi-Model Chat Interface project that integrates three types of AI models:
+This is a Multi-Model Chat Interface project that integrates four types of AI models:
 - **OpenAI API** (GPT-3.5-turbo) for advanced text generation
-- **Hugging Face transformers** for open-source model access
+- **Hugging Face transformers** for local open-source model access
+- **Hugging Face Inference API** for serverless model access without local downloads
 - **DistilBERT** for text classification and lightweight generation
 
 The project is built with FastAPI for the backend API, includes a web-based chat interface, and supports fine-tuning capabilities for custom datasets.
@@ -37,10 +38,18 @@ This starts the FastAPI server using uvicorn with settings from `src.utils.confi
 
 ### Testing
 ```bash
-# Test OpenAI client functionality
+# Test individual model clients
 python tests/test_openai_client.py
+python tests/test_huggingface_client.py
+python tests/test_inference_api_client.py
 
-# Run all tests with pytest
+# Test specific models directly with quick validation
+python test_specific_models.py
+
+# Comprehensive model comparison (downloads multiple models, generates reports)
+python tests/test_model_comparison.py
+
+# Run all tests with pytest (if using pytest framework)
 pytest tests/
 ```
 
@@ -64,7 +73,7 @@ jupyter notebook notebooks/
 ## Architecture Overview
 
 ### Core Components
-- **`src/models/`**: Model clients for OpenAI, Hugging Face, and DistilBERT
+- **`src/models/`**: Model clients for OpenAI, Hugging Face (local + Inference API), and DistilBERT
 - **`src/chat/`**: Chat handling and message processing logic
 - **`src/api/`**: FastAPI routes and endpoints
 - **`src/utils/`**: Configuration management using Pydantic Settings
@@ -97,6 +106,13 @@ Each model type follows a consistent pattern:
 - Includes comprehensive error handling for different API exceptions
 - Tracks token usage and model performance
 
+### Inference API Client (`src/models/inference_api_client.py`)
+- Serverless access to Hugging Face models without local downloads
+- Supports multiple NLP tasks: text generation, classification, Q&A, summarization, embeddings
+- Built-in retry logic and error handling for API failures
+- Rate limit management and model loading detection
+- No local storage requirements - ideal for production deployments
+
 ### Configuration Management
 The `get_settings()` function provides cached access to all configuration values. The `get_model_config()` function returns model-specific configurations. Model cache directories are automatically created via `create_model_cache_dir()` when needed.
 
@@ -110,15 +126,17 @@ The `get_settings()` function provides cached access to all configuration values
 
 1. **Environment Setup**: Activate virtual environment and create `.env` file with required API keys
 2. **Dependencies**: Install requirements with `pip install -r requirements.txt`
-3. **Testing**: Run individual model tests (`python tests/test_openai_client.py`) before integration
-4. **Development**: Use `python main.py` for production or `uvicorn` with `--reload` for development
-5. **Model Validation**: Test API connections individually before full system integration
-6. **Jupyter Development**: Use `notebooks/` for experimentation and fine-tuning
+3. **Quick Model Testing**: Run `python test_specific_models.py` to validate core models quickly
+4. **Individual Client Testing**: Run individual model tests (`python tests/test_openai_client.py`) for specific clients
+5. **Comprehensive Testing**: Use `python tests/test_model_comparison.py` for full model performance analysis
+6. **Development**: Use `python main.py` for production or `uvicorn` with `--reload` for development
+7. **Model Validation**: Test API connections individually before full system integration
+8. **Jupyter Development**: Use `notebooks/` for experimentation and fine-tuning
 
 ## Project Structure Notes
 
 - **Modular Architecture**: Clear separation between models, chat logic, API routes, and utilities
-- **Model Abstraction**: Clients provide uniform interfaces for different AI services (OpenAI, Hugging Face, DistilBERT)
+- **Model Abstraction**: Clients provide uniform interfaces for different AI services (OpenAI, local Hugging Face, Inference API, DistilBERT)
 - **Configuration Management**: Centralized Pydantic settings with environment variable support and caching
 - **Cache Management**: Model files cached in `model_cache/` directory, automatically managed
 - **Testing Strategy**: Individual client tests with direct Python execution (not pytest framework)
@@ -132,6 +150,18 @@ Models are automatically downloaded and cached in `model_cache/`. This directory
 
 ### Test Execution Pattern
 Tests are designed to run as standalone Python scripts with direct execution (`python tests/test_*.py`) rather than through pytest, allowing for interactive testing and validation of API connections.
+
+### Model Testing Infrastructure
+- **`test_specific_models.py`**: Quick validation of specific Hugging Face models with immediate feedback
+- **`tests/test_model_comparison.py`**: Comprehensive performance comparison of multiple models with detailed metrics and reporting
+- **`tests/test_inference_api_client.py`**: Complete testing suite for Inference API functionality across multiple NLP tasks
+- **Test Reports**: Automatically generated JSON data and markdown reports in `tests/reports/` directory
+
+### Model Client Comparison
+- **Local Hugging Face** (`huggingface_client.py`): Full model downloads, offline usage, complete control, high disk usage
+- **Inference API** (`inference_api_client.py`): Serverless, no downloads, internet required, potential rate limits, production-ready
+- **OpenAI API** (`openai_client.py`): Premium service, reliable, cost per usage, conversation context support
+- **DistilBERT** (`distilbert_model.py`): Lightweight, fast classification, local processing
 
 ### Environment Configuration
 All model-specific settings (API keys, model names, cache paths) are managed through the centralized config system in `src/utils/config.py` with environment variable overrides.
