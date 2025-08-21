@@ -49,6 +49,18 @@ pytest tests/
 pip install -r requirements.txt
 ```
 
+### Development Server
+```bash
+# Run with auto-reload for development
+uvicorn src.api.routes:app --reload --host localhost --port 8000
+```
+
+### Jupyter Notebooks
+```bash
+# Start Jupyter for fine-tuning experiments
+jupyter notebook notebooks/
+```
+
 ## Architecture Overview
 
 ### Core Components
@@ -58,11 +70,12 @@ pip install -r requirements.txt
 - **`src/utils/`**: Configuration management using Pydantic Settings
 
 ### Configuration System
-The project uses Pydantic Settings with environment variable support in `src/utils/config.py`. Key settings include:
-- Model configurations (tokens, temperature, cache directories)
-- API settings (host, port, rate limits)
-- Chat settings (context length, timeouts)
-- Performance settings (GPU usage, batch size)
+The project uses Pydantic Settings with environment variable support in `src/utils/config.py`. Settings are cached using `@lru_cache()` for performance. Key configuration categories:
+- **Model configurations**: tokens, temperature, cache directories
+- **API settings**: host, port, rate limits  
+- **Chat settings**: context length, timeouts
+- **Performance settings**: GPU usage, batch size, workers
+- **Security settings**: rate limits, message length validation
 
 ### Model Integration Pattern
 Each model type follows a consistent pattern:
@@ -85,7 +98,7 @@ Each model type follows a consistent pattern:
 - Tracks token usage and model performance
 
 ### Configuration Management
-The `get_settings()` function provides cached access to all configuration values. Model cache directories are automatically created when needed.
+The `get_settings()` function provides cached access to all configuration values. The `get_model_config()` function returns model-specific configurations. Model cache directories are automatically created via `create_model_cache_dir()` when needed.
 
 ### Error Handling Strategy
 - Rate limiting handled with exponential backoff
@@ -95,15 +108,30 @@ The `get_settings()` function provides cached access to all configuration values
 
 ## Development Workflow
 
-1. **Environment Setup**: Activate virtual environment and set up `.env` file
-2. **Testing**: Run individual model tests before full integration
-3. **Development**: Use the FastAPI development server with reload enabled
-4. **Model Testing**: Use the test scripts in `tests/` to validate API connections
+1. **Environment Setup**: Activate virtual environment and create `.env` file with required API keys
+2. **Dependencies**: Install requirements with `pip install -r requirements.txt`
+3. **Testing**: Run individual model tests (`python tests/test_openai_client.py`) before integration
+4. **Development**: Use `python main.py` for production or `uvicorn` with `--reload` for development
+5. **Model Validation**: Test API connections individually before full system integration
+6. **Jupyter Development**: Use `notebooks/` for experimentation and fine-tuning
 
 ## Project Structure Notes
 
-- The project follows a modular architecture separating concerns
-- Models are abstracted behind client interfaces for easy swapping
-- Configuration is centralized and environment-aware
-- Chat functionality is separated from model implementations
-- Frontend and backend are loosely coupled through API endpoints
+- **Modular Architecture**: Clear separation between models, chat logic, API routes, and utilities
+- **Model Abstraction**: Clients provide uniform interfaces for different AI services (OpenAI, Hugging Face, DistilBERT)
+- **Configuration Management**: Centralized Pydantic settings with environment variable support and caching
+- **Cache Management**: Model files cached in `model_cache/` directory, automatically managed
+- **Testing Strategy**: Individual client tests with direct Python execution (not pytest framework)
+- **Frontend Integration**: Static files and Jinja2 templates for web interface
+- **Development Tools**: Jupyter notebooks in `notebooks/` for experimentation and fine-tuning
+
+## Important Implementation Details
+
+### Model Cache Directory
+Models are automatically downloaded and cached in `model_cache/`. This directory can become large (several GB) and should be excluded from version control.
+
+### Test Execution Pattern
+Tests are designed to run as standalone Python scripts with direct execution (`python tests/test_*.py`) rather than through pytest, allowing for interactive testing and validation of API connections.
+
+### Environment Configuration
+All model-specific settings (API keys, model names, cache paths) are managed through the centralized config system in `src/utils/config.py` with environment variable overrides.

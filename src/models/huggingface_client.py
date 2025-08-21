@@ -213,18 +213,13 @@ class HuggingFaceClient:
         """Get information about available model types"""
         return {
             "text_generation": [
-                "microsoft/DialoGPT-medium",
-                "microsoft/DialoGPT-large", 
+                "facebook/blenderbot_small-90M",
                 "gpt2",
-                "gpt2-medium",
-                "facebook/blenderbot-400M-distill",
-                "facebook/blenderbot_small-90M"
+
             ],
             "text_classification": [
                 "cardiffnlp/twitter-roberta-base-sentiment-latest",
                 "distilbert-base-uncased-finetuned-sst-2-english",
-                "nlptown/bert-base-multilingual-uncased-sentiment",
-                "cardiffnlp/twitter-roberta-base-emotion"
             ]
         }
     
