@@ -48,7 +48,7 @@ class OpenAIClient:
     def __init__(self):
         self.settings = get_settings()
         self.api_key = self.settings.openai_api_key
-        self.model = "gpt-3.5-turbo"  # Use specific model instead of default_model
+        self.model = "gpt-3.5-turbo"
         self.max_tokens = self.settings.max_tokens
         self.temperature = self.settings.temperature
         

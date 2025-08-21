@@ -6,8 +6,9 @@ import os
 import sys
 from dotenv import load_dotenv
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+# Add project root to path
+project_root = os.path.dirname(os.path.dirname(__file__))
+sys.path.insert(0, project_root)
 
 load_dotenv()
 
@@ -117,7 +118,7 @@ def test_without_api_key():
         del os.environ['OPENAI_API_KEY']
     
     try:
-        from models.openai_client import OpenAIClient
+        from src.models.openai_client import OpenAIClient
         client = OpenAIClient()
         print("✗ Should have failed without API key")
         return False
