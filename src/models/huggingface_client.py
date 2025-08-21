@@ -41,7 +41,6 @@ class HuggingFaceClient:
         
         # Initialize default generation pipeline
         self._initialize_generation_pipeline()
-    
     def _initialize_generation_pipeline(self) -> None:
         """Initialize the text generation pipeline"""
         try:
@@ -53,7 +52,6 @@ class HuggingFaceClient:
                 model=self.model_name,
                 tokenizer=self.model_name,
                 device=0 if self.use_gpu else -1,  # 0 for first GPU, -1 for CPU
-                # cache_dir=self.cache_dir,
                 torch_dtype=torch.float16 if self.use_gpu else torch.float32,
                 trust_remote_code=True,
                 return_full_text=False,  # Return only generated text
@@ -75,7 +73,6 @@ class HuggingFaceClient:
                     "text-generation",
                     model=self.model_name,
                     device=-1,  # Force CPU
-                    # cache_dir=self.cache_dir
                 )
                 self.logger.info(" Generation pipeline initialized with fallback config")
                 self.use_gpu = False
@@ -95,8 +92,7 @@ class HuggingFaceClient:
                 "text-classification",
                 model=model_name,
                 device=0 if self.use_gpu else -1,
-                # cache_dir=self.cache_dir,
-                return_all_scores=True
+                return_all_scores=True,
             )
             
             self.logger.info(" Classification pipeline initialized successfully")
