@@ -45,12 +45,18 @@ def retry_with_exponential_backoff(
 
 
 class OpenAIClient:
-    def __init__(self):
+    def __init__(
+            self,
+            api_key: str,
+            model: str = "gpt-3.5-turbo",
+            max_tokens: int = 1024,
+            temperature: float = 0.7
+            ):
+        self.api_key = api_key
+        self.model = model
+        self.max_tokens = max_tokens
+        self.temperature = temperature
         self.settings = get_settings()
-        self.api_key = self.settings.openai_api_key
-        self.model = "gpt-3.5-turbo"
-        self.max_tokens = self.settings.max_tokens
-        self.temperature = self.settings.temperature
         
         try:
             self.client = OpenAI(api_key=self.api_key)

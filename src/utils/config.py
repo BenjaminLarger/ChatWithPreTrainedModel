@@ -53,6 +53,15 @@ class Settings(BaseSettings):
     api_rate_limit: int = Field(100, env="API_RATE_LIMIT")  # requests per minute
     max_message_length: int = Field(2000, env="MAX_MESSAGE_LENGTH")
     
+    # Fine-tuning Settings
+    fine_tune_output_dir: str = Field("./fine_tuned_models", env="FINE_TUNE_OUTPUT_DIR")
+    fine_tune_batch_size: int = Field(16, env="FINE_TUNE_BATCH_SIZE")
+    fine_tune_learning_rate: float = Field(2e-5, env="FINE_TUNE_LEARNING_RATE")
+    fine_tune_epochs: int = Field(3, env="FINE_TUNE_EPOCHS")
+    fine_tune_warmup_steps: int = Field(500, env="FINE_TUNE_WARMUP_STEPS")
+    fine_tune_weight_decay: float = Field(0.01, env="FINE_TUNE_WEIGHT_DECAY")
+    early_stopping_patience: int = Field(3, env="EARLY_STOPPING_PATIENCE")
+    
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
@@ -97,6 +106,15 @@ def get_model_config() -> dict:
             "model_name": settings.distilbert_model_name,
             "cache_dir": settings.model_cache_dir,
             "use_gpu": settings.use_gpu,
-            "max_length": 512
+            "max_length": 512,
+            "fine_tune": {
+                "output_dir": settings.fine_tune_output_dir,
+                "batch_size": settings.fine_tune_batch_size,
+                "learning_rate": settings.fine_tune_learning_rate,
+                "epochs": settings.fine_tune_epochs,
+                "warmup_steps": settings.fine_tune_warmup_steps,
+                "weight_decay": settings.fine_tune_weight_decay,
+                "early_stopping_patience": settings.early_stopping_patience
+            }
         }
     }

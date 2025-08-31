@@ -139,7 +139,7 @@ class InferenceAPIClient:
               ]
           )
           print(f"completion: {completion.choices[0].message}")
-          generated_text = completion.choices[0].message
+          generated_text = completion.choices[0].message.content
           input_tokens = len(prompt.split())
           output_tokens = len(generated_text.split())
           
@@ -151,7 +151,7 @@ class InferenceAPIClient:
                   "completion_tokens": output_tokens,
                   "total_tokens": input_tokens + output_tokens
               },
-              "parameters": payload["parameters"],
+              "parameters": kwargs,
               "api_type": "inference_api"
           }
         except Exception as e:
