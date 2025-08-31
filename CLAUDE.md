@@ -42,6 +42,7 @@ This starts the FastAPI server using uvicorn with settings from `src.utils.confi
 python tests/test_openai_client.py
 python tests/test_huggingface_client.py
 python tests/test_inference_api_client.py
+python tests/test_distilbert_finetuning.py
 
 # Test specific models directly with quick validation
 python test_specific_models.py
@@ -49,7 +50,10 @@ python test_specific_models.py
 # Comprehensive model comparison (downloads multiple models, generates reports)
 python tests/test_model_comparison.py
 
-# Run all tests with pytest (if using pytest framework)
+# Fine-tuning example and testing
+python example_distilbert_finetuning.py
+
+# Run all tests with pytest
 pytest tests/
 ```
 
@@ -165,3 +169,76 @@ Tests are designed to run as standalone Python scripts with direct execution (`p
 
 ### Environment Configuration
 All model-specific settings (API keys, model names, cache paths) are managed through the centralized config system in `src/utils/config.py` with environment variable overrides.
+
+## Fine-Tuning Capabilities
+
+### DistilBERT Fine-Tuning
+The project supports comprehensive DistilBERT fine-tuning through multiple interfaces:
+- **REST API endpoints**: `/finetune/distilbert/upload` and `/finetune/distilbert/sample`
+- **Standalone script**: `example_distilbert_finetuning.py` for command-line fine-tuning
+- **Test validation**: `tests/test_distilbert_finetuning.py` for testing fine-tuning functionality
+
+### Fine-Tuning Workflow
+1. Upload dataset via API or use sample data generation
+2. Configure training parameters (epochs, learning rate, batch size)
+3. Monitor training progress with Weights & Biases integration
+4. Save trained models to `fine_tuned_models/` directory
+5. Use fine-tuned models through `/predict/distilbert` endpoint
+
+### Fine-Tuned Model Management
+- Models saved in `fine_tuned_models/` with training metadata
+- Training history stored in JSON format for each model
+- Model discovery through `/finetune/models` endpoint
+- Automatic checkpoint saving during training
+
+## API Architecture
+
+### FastAPI Application Structure
+- **Main entry**: `main.py` uses uvicorn with settings from config
+- **Routes**: `src/api/routes.py` handles all HTTP and WebSocket endpoints
+- **WebSocket support**: Real-time chat via `/ws` endpoint with connection management
+- **Model clients**: Lazy-loaded and cached for performance
+
+### Key API Endpoints
+- `GET /`: Main chat interface (HTML)
+- `POST /chat`: Standard chat with conversation history support
+- `WebSocket /ws`: Real-time chat with status updates
+- `GET /models/status`: Health check for all model types
+- `GET /api/models`: Complete model configuration details
+- `POST /finetune/distilbert/upload`: Upload datasets for fine-tuning
+- `POST /predict/distilbert`: Inference with default or fine-tuned models
+
+### Model Client Pattern
+Each model client (`src/models/`) implements a consistent interface:
+- Async initialization and connection validation
+- Standardized response format with usage metrics
+- Error handling with exponential backoff
+- Configuration through Pydantic settings
+
+## Monitoring and Experimentation
+
+### Weights & Biases Integration
+- Automatic experiment tracking during fine-tuning
+- Training metrics logged in `wandb/` directory
+- Visual training progress in Jupyter notebooks
+
+### Performance Testing
+- **Individual tests**: Quick validation of specific model functionality
+- **Comparison tests**: Multi-model performance analysis with automated reporting
+- **Load testing**: WebSocket connection management validation
+
+## Development Notes
+
+### Virtual Environment Usage
+Always activate the virtual environment before running any commands:
+```bash
+source .venv/bin/activate
+```
+
+### Testing Philosophy
+Tests run as standalone Python scripts rather than pytest framework to allow interactive API validation and immediate feedback during development.
+
+### Cache Management
+- Model files in `model_cache/` can become large (multiple GB)
+- Fine-tuned models in `fine_tuned_models/` include full training state
+- Both directories should be excluded from version control

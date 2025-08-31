@@ -2,3 +2,6 @@
 *__pycache__*
 model_cache/*
 tests/reports/mo*
+test_fine_tuned_model/*
+example_fine_tuned_model/*
+wandb/*
